@@ -34,4 +34,13 @@
 				    (concatenate 'string (string (aref b64chars (rem num 64))) retstr))))))
       (rec-helper number ""))))
 
-						  
+
+(defun get-hex-rep (bitarray)
+  (let ((hexchars "0123456789ABCDEF")
+	(number (bit-array-to-integer bitarray)))
+    (labels ((rec-helper (num retstr)
+	       (cond ((= 0 num) retstr)
+		     (t (rec-helper (truncate num 16)
+				    (concatenate 'string (string (aref hexchars (rem num 16))) retstr))))))
+      (rec-helper number ""))))
+
