@@ -96,5 +96,42 @@
       (rec-helper 0))))
 
 
+;; challenge 3
+;; single-byte xor
 
+(defun adjust-to-word-length-n (bitarray wordlength)
+  "Takes a bit array and changes it to divide evenly with the wordlength"
+  (let* ((arrlen (car (array-dimensions bitarray)))
+	 (bits-needed (- wordlength (rem arrlen wordlength))))
+    (adjust-array bitarray (+ arrlen bits-needed)
+		  :element-type 'bit :initial-element 0)))
 
+(defun remove-superfluous-zeros-n (bitarray)
+  "Basically the opposite of adjust-to-word-length-n"
+  (adjust-array bitarray (+ 1 (floor (log (bit-array-to-uinteger bitarray) 2))) :element-type 'bit))
+
+(defun copy-bit-array (bitarray)
+  (fixed-xor (make-array (array-dimensions bitarray)
+			 :adjustable t
+			 :element-type 'bit
+			 :initial-element 0)
+	     bitarray))
+
+(defun single-word-xor (bitarray word)
+  "XORs bitarray by word, adjusting as needed. word is also a bitarray"
+  ;; wait, do I extend or just leave it? extending for now
+  (let ((retarray (adjust-to-word-length-n (copy-bit-array bitarray)
+					   (car (array-dimensions word)))))
+    (labels ((rec-helper (index)
+	       (cond ((= index (car (array-dimensions retarray))) retarray)
+		     (t (setf (aref retarray index)
+			      (logxor (aref retarray index)
+				      (aref word (rem index
+						      (car (array-dimensions word))))))
+			(rec-helper (+ index 1))))))
+      (print (array-dimensions bitarray))
+      (print (array-dimensions retarray))
+      (print (array-dimensions word))
+      (rec-helper 0))))
+
+						
