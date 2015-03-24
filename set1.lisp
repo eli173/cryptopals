@@ -129,9 +129,22 @@
 				      (aref word (rem index
 						      (car (array-dimensions word))))))
 			(rec-helper (+ index 1))))))
-      (print (array-dimensions bitarray))
-      (print (array-dimensions retarray))
-      (print (array-dimensions word))
       (rec-helper 0))))
 
-						
+
+(defun word-count-bit-array (bitarray word wordsize)
+  (labels ((rec-helper index))))
+
+(defun word-dist-bit-array (bitarray wordlen)
+  "Prints a nice distribution for each possible value of bit-len word. Caution: bad if word not small"
+  (let ((workingarray (adjust-to-word-length-n (copy-bit-array bitarray) wordlen))
+	(num-words (expt 2 wordlen))
+	(freq-array (make-array num-words :initial-element 0)))
+    (loop for i from 0 to (- num-words 1) do
+	 )))
+
+(defun s1c3-play ()
+  (loop for i from 1 to 15 do
+       (print (single-word-xor
+	       (hex-import-string "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")
+	       (uinteger-to-bitarray i)))))
