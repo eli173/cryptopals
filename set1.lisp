@@ -132,8 +132,6 @@
       (rec-helper 0))))
 
 
-(defun word-count-bit-array (bitarray word wordsize)
-  (labels ((rec-helper index))))
 
 (defun word-dist-bit-array (bitarray wordlen)
   "Prints a nice distribution for each possible value of bit-len word. Caution: bad if word not small"
@@ -169,7 +167,7 @@
   "Returns a list of uints of wordsize size from bitarray"
   (mapcar #'bit-array-to-uinteger (get-word-list bitarray wordsize)))
 
-(defun bit-array-to-string (bitarray)
+(defun bit-array-to-char-list (bitarray)
   (mapcar #'code-char (get-word-uint-list bitarray 8)))
 
 (defvar char-freq-table
@@ -181,6 +179,50 @@
       0.018 0.001 0.060 0.063 0.091
       0.029 0.011 0.021 0.002 0.021
       0.001)))
+
+
+(defun score-bitarray (bitarray)
+  "Scores a bitarray according to char-freq-table"
+  (labels ((get-char-score (char)
+	     (cond
+	       ((position char (car char-freq-table))
+		(aref (caddr char-freq-table)
+		      (position char (car char-freq-table))))
+	       ((position char (cadr char-freq-table))
+		(aref (caddr char-freq-table)
+		      (position char (cadr char-freq-table))))
+	       (t 0))))
+    (reduce #'+ (mapcar #'get-char-score (bit-array-to-char-list bitarray)))))
+
+
+(defun get-scores-of-char-xor (bitarray)
+  (labels ((rec-helper (num x)
+	     (cond ((eq num 0) x)
+		   (t (rec-helper
+		       (- num 1)
+		       (cons (score-bitarray
+			      (single-word-xor
+			       bitarray
+			       (uinteger-to-bitarray num)))
+			     x))))))
+    (rec-helper 255 nil)))
+
+(defun first-n (n x)
+  (labels ((rec-helper (n wx rx)
+	     (cond ((= n 0) rx)
+		   (t (rec-helper (- n 1) (cdr wx) (cons (car wx) rx))))))
+    (reverse (rec-helper n x nil))))
+
+(defun get-top-n-scores (n bitarray)
+  (first-n n (sort (get-scores-of-char-xor bitarray) #'>)))
+
+(defun get-top-n-strings (n bitarray)
+  (let ((arrs (get-scores-of-char-xor bitarray))
+	(scores (get-scores-of-char-xor bitarray))
+	(topscores (get-top-n-scores n bitarray)))
+    (labels ((get-matching-str (score)
+	       (nth (position score scores) arrs)))
+      (mapcar #'get-matching-str topscores))))
 
 (defun s1c3-play ()
   (loop for i from 1 to 15 do
