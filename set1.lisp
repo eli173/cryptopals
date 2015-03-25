@@ -143,6 +143,45 @@
     (loop for i from 0 to (- num-words 1) do
 	 )))
 
+
+(defun get-sub-array (bitarray index size)
+  "Returns bit array of length size starting at index (zero-indexed) in bitarray"
+  (let ((ret-array (make-array size :initial-element 0 :element-type 'bit)))
+    (labels ((rec-helper (num)
+	       (cond ((= num size) ret-array)
+		     (t (setf (aref ret-array num) (aref bitarray (+ index num)))
+			(rec-helper (+ num 1))))))
+      (rec-helper 0))))
+
+(defun get-word-list (bitarray wordsize)
+  (let* ((working-array (adjust-to-word-length-n (copy-bit-array bitarray) wordsize))
+	 (num-words (truncate (car (array-dimensions working-array)) wordsize)))
+    (labels ((rec-helper (words ret-list)
+	       (cond ((= words num-words) ret-list)
+		     (t (rec-helper (+ words 1)
+				    (cons (get-sub-array working-array
+							 (* wordsize words)
+							 wordsize)
+					  ret-list))))))
+      (rec-helper 0 nil))))
+
+(defun get-word-uint-list (bitarray wordsize)
+  "Returns a list of uints of wordsize size from bitarray"
+  (mapcar #'bit-array-to-uinteger (get-word-list bitarray wordsize)))
+
+(defun bit-array-to-string (bitarray)
+  (mapcar #'code-char (get-word-uint-list bitarray 8)))
+
+(defvar char-freq-table
+  '("abcdefghijklmnopqrstuvwzyz"
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    #(0.081 0.015 0.027 0.043 0.120
+      0.023 0.020 0.059 0.073 0.001
+      0.007 0.040 0.026 0.070 0.077
+      0.018 0.001 0.060 0.063 0.091
+      0.029 0.011 0.021 0.002 0.021
+      0.001)))
+
 (defun s1c3-play ()
   (loop for i from 1 to 15 do
        (print (single-word-xor
