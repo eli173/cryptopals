@@ -217,12 +217,25 @@
   (first-n n (sort (get-scores-of-char-xor bitarray) #'>)))
 
 (defun get-top-n-strings (n bitarray)
-  (let ((arrs (get-scores-of-char-xor bitarray))
-	(scores (get-scores-of-char-xor bitarray))
-	(topscores (get-top-n-scores n bitarray)))
-    (labels ((get-matching-str (score)
-	       (nth (position score scores) arrs)))
-      (mapcar #'get-matching-str topscores))))
+  (mapcar #'(lambda (ba)
+	      (coerce (bit-array-to-char-list ba) 'string))
+	  (mapcar #'cdr
+		  (first-n n (get-scores-and-strings bitarray)))))
+
+(defun get-scores-and-strings (bitarray)
+  (labels ((get-pair (thebyte)
+	     (cons (score-bitarray
+		    (single-word-xor bitarray
+				     (adjust-to-word-length-n
+				      (uinteger-to-bitarray thebyte) 8)))
+		   (single-word-xor bitarray
+				    (adjust-to-word-length-n
+				     (uinteger-to-bitarray thebyte) 8))))
+	   (rec-helper (byte retlist)
+	     (cond ((= byte 256)
+		    retlist)
+		   (t (rec-helper (+ byte 1) (cons (get-pair byte) retlist))))))
+    (rec-helper 1 nil)))
 
 (defun s1c3-play ()
   (loop for i from 1 to 15 do
