@@ -7,6 +7,8 @@
   (print "Challenge 2:")
   (print (get-hex-rep (fixed-xor (hex-import-string "1c0111001f010100061a024b53535009181c")
 				 (hex-import-string "686974207468652062756c6c277320657965"))))
+  (print "Challenge 3:")
+  (print (nth 5 (get-top-n-strings 6 (hex-import-string "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"))))
   nil)
 
 
@@ -103,8 +105,10 @@
   "Takes a bit array and changes it to divide evenly with the wordlength"
   (let* ((arrlen (car (array-dimensions bitarray)))
 	 (bits-needed (- wordlength (rem arrlen wordlength))))
-    (adjust-array bitarray (+ arrlen bits-needed)
-		  :element-type 'bit :initial-element 0)))
+    ( if (= bits-needed wordlength)
+	 bitarray
+	 (adjust-array bitarray (+ arrlen bits-needed)
+			  :element-type 'bit :initial-element 0))))
 
 (defun remove-superfluous-zeros-n (bitarray)
   "Basically the opposite of adjust-to-word-length-n"
@@ -130,16 +134,6 @@
 						      (car (array-dimensions word))))))
 			(rec-helper (+ index 1))))))
       (rec-helper 0))))
-
-
-
-;; (defun word-dist-bit-array (bitarray wordlen)
-;;   "Prints a nice distribution for each possible value of bit-len word. Caution: bad if word not small"
-;;   (let ((workingarray (adjust-to-word-length-n (copy-bit-array bitarray) wordlen))
-;; 	(num-words (expt 2 wordlen))
-;; 	(freq-array (make-array num-words :initial-element 0)))
-;;     (loop for i from 0 to (- num-words 1) do
-;; 	 nil)))
 
 
 (defun get-sub-array (bitarray index size)
@@ -245,8 +239,10 @@
 		   (t (rec-helper (+ byte 1) (cons (get-pair byte) retlist))))))
     (rec-helper 1 nil)))
 
-(defun s1c3-play ()
-  (loop for i from 1 to 15 do
-       (print (single-word-xor
-	       (hex-import-string "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")
-	       (uinteger-to-bitarray i)))))
+
+;; challenge 4
+;; find encrypted line in file
+
+
+
+
