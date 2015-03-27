@@ -9,6 +9,8 @@
 				 (hex-import-string "686974207468652062756c6c277320657965"))))
   (print "Challenge 3:")
   (print (nth 5 (get-top-n-strings 6 (hex-import-string "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"))))
+  (print "Challenge 4:")
+  (print (caar (filter-search-by 1.4 (search-the-file))))
   nil)
 
 
@@ -266,4 +268,10 @@
 			       x))))))
       (build-setup (read-line f nil nil) nil))))
 
-
+(defun filter-search-by (r search-results)
+  (labels ((filter-one-of-em (result-list)
+	     (remove-if
+	      #'(lambda (e)
+		  (< (score-string e) r))
+	      result-list)))
+    (remove-if #'null (mapcar #'filter-one-of-em search-results))))
