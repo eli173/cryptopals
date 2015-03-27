@@ -243,6 +243,16 @@
 ;; challenge 4
 ;; find encrypted line in file
 
-
+(defun search-the-file ()
+  (let ((f (open "./set-1-4.txt")))
+    (labels ((build-setup (curr-line x)
+	       (cond ((null curr-line) x)
+		     (t (build-setup
+			 (read-line f nil nil)
+			 (cons (get-top-n-strings
+				10
+				(hex-import-string curr-line))
+			       x))))))
+      (build-setup (read-line f nil nil) nil))))
 
 
