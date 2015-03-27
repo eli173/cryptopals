@@ -133,13 +133,13 @@
 
 
 
-(defun word-dist-bit-array (bitarray wordlen)
-  "Prints a nice distribution for each possible value of bit-len word. Caution: bad if word not small"
-  (let ((workingarray (adjust-to-word-length-n (copy-bit-array bitarray) wordlen))
-	(num-words (expt 2 wordlen))
-	(freq-array (make-array num-words :initial-element 0)))
-    (loop for i from 0 to (- num-words 1) do
-	 )))
+;; (defun word-dist-bit-array (bitarray wordlen)
+;;   "Prints a nice distribution for each possible value of bit-len word. Caution: bad if word not small"
+;;   (let ((workingarray (adjust-to-word-length-n (copy-bit-array bitarray) wordlen))
+;; 	(num-words (expt 2 wordlen))
+;; 	(freq-array (make-array num-words :initial-element 0)))
+;;     (loop for i from 0 to (- num-words 1) do
+;; 	 nil)))
 
 
 (defun get-sub-array (bitarray index size)
@@ -169,6 +169,12 @@
 
 (defun bit-array-to-char-list (bitarray)
   (mapcar #'code-char (get-word-uint-list bitarray 8)))
+
+(defun bit-array-to-string (bitarray)
+  (coerce (bit-array-to-char-list bitarray) 'string))
+
+(defun string-to-bit-array (string)
+  )
 
 (defvar char-freq-table
   '("abcdefghijklmnopqrstuvwzyz"
@@ -220,7 +226,9 @@
   (mapcar #'(lambda (ba)
 	      (coerce (bit-array-to-char-list ba) 'string))
 	  (mapcar #'cdr
-		  (first-n n (get-scores-and-strings bitarray)))))
+		  (first-n n (sort (get-scores-and-strings bitarray)
+				   #'(lambda (a b)
+				       (> (car a) (car b))))))))
 
 (defun get-scores-and-strings (bitarray)
   (labels ((get-pair (thebyte)
