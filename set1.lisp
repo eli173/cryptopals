@@ -194,6 +194,17 @@
 	       (t 0))))
     (reduce #'+ (mapcar #'get-char-score (bit-array-to-char-list bitarray)))))
 
+(defun score-string (string)
+  (labels ((get-char-score (char)
+	     (cond
+	       ((position char (car char-freq-table))
+		(aref (caddr char-freq-table)
+		      (position char (car char-freq-table))))
+	       ((position char (cadr char-freq-table))
+		(aref (caddr char-freq-table)
+		      (position char (cadr char-freq-table))))
+	       (t 0))))
+      (reduce #'+ (map 'list #'get-char-score string))))
 
 (defun get-scores-of-char-xor (bitarray)
   (labels ((rec-helper (num x)
