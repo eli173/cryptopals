@@ -169,8 +169,23 @@
 (defun bit-array-to-string (bitarray)
   (coerce (bit-array-to-char-list bitarray) 'string))
 
+
 (defun string-to-bit-array (string)
-  )
+  ;; (let ((retarray (make-array (* 8 (length string))
+  ;; 			      :adjustable t
+  ;; 			      :element-type 'bit
+  ;; 			      :initial-element 0))))
+  (labels ((uint-byte-list-to-uint (ls index ret)
+	     (cond ((null ls) ret)
+		   (t
+		    (uint-byte-list-to-uint
+		     (cdr ls)
+		     (+ index 1)
+		     (+ (* ret 256) (car ls)))))))
+    (adjust-to-word-length-n (uinteger-to-bitarray
+			      (uint-byte-list-to-uint
+			       (map 'list #'char-code string) 0 0))
+			     8)))
 
 (defvar char-freq-table
   '("abcdefghijklmnopqrstuvwzyz"
