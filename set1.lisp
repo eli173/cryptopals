@@ -171,10 +171,6 @@
 
 
 (defun string-to-bit-array (string)
-  ;; (let ((retarray (make-array (* 8 (length string))
-  ;; 			      :adjustable t
-  ;; 			      :element-type 'bit
-  ;; 			      :initial-element 0))))
   (labels ((uint-byte-list-to-uint (ls index ret)
 	     (cond ((null ls) ret)
 		   (t
@@ -294,7 +290,23 @@
 ;; challenge 5
 ;; repeating-key XOR
 
+(defun repeating-key-xor (plain key)
+  ;; wait.. this is just swxor with var-length key...
+  ;; No! you can't adjust the plain, it loads the end with junk
+  ;; I'll just always make it 8 bits...
+  (let ((retarray (adjust-to-word-length-n (copy-bit-array plain) 8)))
+    (labels ((rec-helper (index)
+	       (cond ((= index (car (array-dimensions retarray))) retarray)
+		     (t (setf (aref retarray index)
+			      (logxor (aref retarray index)
+				      (aref key (rem index
+						     (car
+						      (array-dimensions key))))))
+			(rec-helper (+ index 1))))))
+      (rec-helper 0))))
 
+
+;; not what c5 is asking!
 (defun cbc-mode-encrypt (plain key)
   "Chains XOR over plain bitarray using key bitarray"
   (let ((retarray (adjust-to-word-length-n (copy-bit-array plain)
