@@ -275,3 +275,25 @@
 		  (< (score-string e) r))
 	      result-list)))
     (remove-if #'null (mapcar #'filter-one-of-em search-results))))
+
+;; challenge 5
+;; repeating-key XOR
+
+
+(defun cbc-mode-encrypt (plain key)
+  "Chains XOR over plain bitarray using key bitarray"
+  (let ((retarray (adjust-to-word-length-n (copy-bit-array plain)
+					   (car (array-dimensions key))))
+	(newkey (copy-bit-array key)))
+    (labels ((rec-helper (index)
+	       (cond ((= index (car (array-dimensions retarray)))
+		      retarray)
+		     (t (setf (aref retarray index)
+			      (logxor (aref retarray index)
+				      (aref newkey (rem index
+							(car (array-dimensions newkey))))))
+			(setf (aref newkey (rem index
+						(car (array-dimensions newkey))))
+			      (aref retarray index))
+			(rec-helper (+ index 1))))))
+      (rec-helper 0)))))
