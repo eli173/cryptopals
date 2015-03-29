@@ -290,6 +290,33 @@
 ;; challenge 5
 ;; repeating-key XOR
 
+(defun offset-byte-xor (bitarray byte offset-bytes)
+  "XORs the byte with offset-bytes position offset in bitarray"
+  (let ((retarray (adjust-to-word-length-n (copy-bit-array bitarray) 8))
+	(offset-pos (* 8 offset-bytes)))
+    (loop for i from 0 to 7 do
+	 (setf (aref retarray (+ offset-pos i))
+	       (logxor (aref retarray (+ offset-pos i))
+		       (aref byte i))))
+    retarray))
+
+(defun get-byte (bitarray n)
+  "get nth byte 0-indexed ofc"
+  ;; doesn't check if it's in bounds or not
+  (let ((ret-byte (make-array 8 :element-type 'bit :initial-element 0 :adjustable t)))
+    (loop for i from 0 to 7 do
+	 (setf (aref ret-byte i)
+	       (aref bitarray (+ i (* 8 n)))))
+    ret-byte))
+
+(defun set-byte-n (bitarray n byte)
+  "sets nth byte in bitarray to byte"
+  (loop for i from 0 to 7 do
+       (setf (aref bitarray (+ i(* n 8)))
+	     (aref byte i)))
+  bitarray)
+
+;; okay not sure how to specify... kinda just for strings?
 (defun repeating-key-xor (plain key)
   ;; wait.. this is just swxor with var-length key...
   ;; No! you can't adjust the plain, it loads the end with junk
@@ -303,8 +330,17 @@
 						     (car
 						      (array-dimensions key))))))
 			(rec-helper (+ index 1))))))
+      (print (array-dimensions key))
+      (print (array-dimensions retarray))
       (rec-helper 0))))
 
+(defun test-repeating-key-xor (plain key)
+  (let ((retarray (adjust-to-word-length-n (copy-bit-array plain) 8))
+	(workarray (make-array 8 :element-type 'bit :initial-element 0 :adjustable t)))
+    (labels ((rec-helper (index) ;byte index
+	       (cond ((= index (/ (car (array-dimensions retarray)) 8))
+		      retarray)
+		     (t (setf (aref)))))))))
 
 ;; not what c5 is asking!
 (defun cbc-mode-encrypt (plain key)
@@ -323,4 +359,4 @@
 						(car (array-dimensions newkey))))
 			      (aref retarray index))
 			(rec-helper (+ index 1))))))
-      (rec-helper 0)))))
+      (rec-helper 0))))
