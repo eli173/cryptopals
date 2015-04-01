@@ -348,7 +348,7 @@
   ;; I'll just always make it 8 bits...
   (let ((retarray (adjust-to-word-length-n (copy-bit-array plain) 8)))
     (labels ((rec-helper (index)
-	       (cond ((= index 0)
+	       (cond ((< index 0)
 		      retarray)
 		     (t		      
 		      (setf (aref retarray index)
@@ -357,8 +357,28 @@
 						     (car
 						      (array-dimensions key))))))
 			(rec-helper (- index 1))))))
-      (rec-helper (car (array-dimensions retarray))))))
+      (rec-helper (- (car (array-dimensions retarray)) 1)))))
 
+(defun newer-byte-repeating-key-xor (plain key)
+  (let* ((retarray (adjust-to-word-length-n (copy-bit-array plain) 8))
+	(key-bytes (truncate (car (array-dimensions key)) 8))
+	(plain-bytes (truncate (car (array-dimensions retarray)) 8))
+	)
+    (labels ((rec-helper (byte-index)
+	       (cond ((= byte-index plain-bytes)
+		      retarray)
+		     (t
+		      (format t "p:~S, k:~S~%"
+			      (bit-array-to-string (get-byte retarray byte-index))
+			      (bit-array-to-string (get-byte key (rem byte-index key-bytes))))
+		      (set-byte-n retarray byte-index
+				  (adjust-to-word-length-n
+				   (fixed-xor
+				    (get-byte retarray byte-index)
+				    (get-byte key (rem byte-index key-bytes)))
+				   8))
+		      (rec-helper (+ byte-index 1))))))
+      (rec-helper 0))))
 
 (defun old-new-repeating-key-xor (plain key)
   (let ((retarray (adjust-to-word-length-n (copy-bit-array plain) 8))
@@ -372,7 +392,8 @@
 				     (get-byte key
 					       (rem
 						index
-						(car (array-dimensions key))))))))))
+						(car (array-dimensions key))))))
+			(rec-helper (+ index 1))))))
       (aref workarray 0)
       (rec-helper 0))))
 
