@@ -321,6 +321,10 @@
   (concatenate 'bit-vector b1 b2))
 
 ;; okay not sure how to specify... kinda just for strings?
+
+;; OHH-KAY think about the strings being backwards,
+;; so it is off if the word length doesn't divide
+;; think about working backwards
 (defun repeating-key-xor (plain key)
   ;; wait.. this is just swxor with var-length key...
   ;; No! you can't adjust the plain, it loads the end with junk
@@ -328,18 +332,35 @@
   (let ((retarray (adjust-to-word-length-n (copy-bit-array plain) 8)))
     (labels ((rec-helper (index)
 	       (cond ((= index (car (array-dimensions retarray)))
-		      (print retarray) retarray)
-		     (t (setf (aref retarray index)
+		      retarray)
+		     (t		      
+		      (setf (aref retarray index)
 			      (logxor (aref retarray index)
 				      (aref key (rem index
 						     (car
 						      (array-dimensions key))))))
 			(rec-helper (+ index 1))))))
-      (print plain)
-      (print key)
       (rec-helper 0))))
 
 (defun new-repeating-key-xor (plain key)
+  ;; wait.. this is just swxor with var-length key...
+  ;; No! you can't adjust the plain, it loads the end with junk
+  ;; I'll just always make it 8 bits...
+  (let ((retarray (adjust-to-word-length-n (copy-bit-array plain) 8)))
+    (labels ((rec-helper (index)
+	       (cond ((= index 0)
+		      retarray)
+		     (t		      
+		      (setf (aref retarray index)
+			      (logxor (aref retarray index)
+				      (aref key (rem index
+						     (car
+						      (array-dimensions key))))))
+			(rec-helper (- index 1))))))
+      (rec-helper (car (array-dimensions retarray))))))
+
+
+(defun old-new-repeating-key-xor (plain key)
   (let ((retarray (adjust-to-word-length-n (copy-bit-array plain) 8))
 	(workarray (make-array 8 :element-type 'bit :initial-element 0 :adjustable t)))
     (labels ((rec-helper (index) ;byte index
@@ -352,6 +373,7 @@
 					       (rem
 						index
 						(car (array-dimensions key))))))))))
+      (aref workarray 0)
       (rec-helper 0))))
 
 ;; not what c5 is asking!
