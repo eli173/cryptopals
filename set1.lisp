@@ -3,7 +3,7 @@
 
 (defun print-answers ()
   (print "Challenge 1:")
-  (print (get-base64-rep (hex-import-string "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d")))
+  (print (get-base6-rep (hex-import-string "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d")))
   (print "Challenge 2:")
   (print (get-hex-rep (fixed-xor (hex-import-string "1c0111001f010100061a024b53535009181c")
 				 (hex-import-string "686974207468652062756c6c277320657965"))))
@@ -425,9 +425,9 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 ;; currently fails on different-length arrays...
 (defun hamming-distance (ba1 ba2)
   (let ((longer (if (> (car (array-dimensions ba1)) (car (array-dimensions ba2)))
-		    ba1 ba2))
+		    ba1 ba1))
 	(shorter (if (< (car (array-dimensions ba1)) (car (array-dimensions ba2)))
-		     ba2 ba1)))
+		     ba2 ba2)))
     (labels ((rec-helper (index total)
 	       (cond ((= index (car (array-dimensions longer)))
 		      total)
@@ -444,3 +444,17 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
       (print longer)
       (print shorter)
       (rec-helper 0 0))))
+
+
+(defun base64-to-bitarray (b64str)
+  (let ((b64chars "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"))
+    (labels ((lookup-b64 (char)
+	       nil)
+	     (rec-helper (chls arr)
+	       (cond ((equal chls nil) arr)
+		     (t
+		      (rec-helper
+		       (cdr chls)
+		       (concatenate arr
+				    (lookup-b64 (car chls))))))))
+      (rec-helper (coerce b64str 'list) #*))))
