@@ -418,3 +418,29 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 			      (aref retarray index))
 			(rec-helper (+ index 1))))))
       (rec-helper 0))))
+
+;; challenge 6
+;; break repeating-key-xor
+
+;; currently fails on different-length arrays...
+(defun hamming-distance (ba1 ba2)
+  (let ((longer (if (> (car (array-dimensions ba1)) (car (array-dimensions ba2)))
+		    ba1 ba2))
+	(shorter (if (< (car (array-dimensions ba1)) (car (array-dimensions ba2)))
+		     ba2 ba1)))
+    (labels ((rec-helper (index total)
+	       (cond ((= index (car (array-dimensions longer)))
+		      total)
+		     ((>= index (car (array-dimensions shorter)))
+		      (rec-helper (+ index 1) (+ total (aref longer index))))
+		     (t
+		      (rec-helper
+		       (+ index 1)
+		       (+ total
+			  (logxor (aref longer index)
+				  (aref shorter index))))))))
+      (print (array-dimensions longer))
+      (print (array-dimensions shorter))
+      (print longer)
+      (print shorter)
+      (rec-helper 0 0))))
