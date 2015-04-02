@@ -11,6 +11,9 @@
   (print (nth 5 (get-top-n-strings 6 (hex-import-string "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"))))
   (print "Challenge 4:")
   (print (caar (filter-search-by 1.4 (search-the-file))))
+  (print "Challenge 5:")
+  (print (get-hex-rep (byte-repeating-key-xor (string-to-bit-array "Burning 'em, if you ain't quick and nimble
+I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
   nil)
 
 
@@ -371,9 +374,6 @@
 	       (cond ((= byte-index plain-bytes)
 		      retarray)
 		     (t
-		      (format t "p:~S, k:~S~%"
-			      (bit-array-to-string (get-byte retarray byte-index))
-			      (bit-array-to-string (get-byte key (pos-rem (- byte-index the-offset) key-bytes))))
 		      (set-byte-n retarray byte-index
 				  (adjust-to-word-length-n
 				   (fixed-xor
@@ -381,7 +381,6 @@
 				    (get-byte key (pos-rem (- byte-index the-offset) key-bytes)))
 				   8))
 		      (rec-helper (+ byte-index 1))))))
-      (print the-offset)
       (rec-helper 0))))
 
 (defun old-new-repeating-key-xor (plain key)
