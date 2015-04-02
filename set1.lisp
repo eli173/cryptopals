@@ -359,25 +359,29 @@
 			(rec-helper (- index 1))))))
       (rec-helper (- (car (array-dimensions retarray)) 1)))))
 
-(defun newer-byte-repeating-key-xor (plain key)
+(defun byte-repeating-key-xor (plain key)
   (let* ((retarray (adjust-to-word-length-n (copy-bit-array plain) 8))
-	(key-bytes (truncate (car (array-dimensions key)) 8))
-	(plain-bytes (truncate (car (array-dimensions retarray)) 8))
-	)
-    (labels ((rec-helper (byte-index)
+	 (key-bytes (truncate (car (array-dimensions key)) 8))
+	 (plain-bytes (truncate (car (array-dimensions retarray)) 8))
+	 (the-offset (rem plain-bytes key-bytes))
+	 )
+    (labels ((pos-rem (a b)
+	       (if (< (rem a b) 0) (+ (rem a b) b) (rem a b)))
+	     (rec-helper (byte-index)
 	       (cond ((= byte-index plain-bytes)
 		      retarray)
 		     (t
 		      (format t "p:~S, k:~S~%"
 			      (bit-array-to-string (get-byte retarray byte-index))
-			      (bit-array-to-string (get-byte key (rem byte-index key-bytes))))
+			      (bit-array-to-string (get-byte key (pos-rem (- byte-index the-offset) key-bytes))))
 		      (set-byte-n retarray byte-index
 				  (adjust-to-word-length-n
 				   (fixed-xor
 				    (get-byte retarray byte-index)
-				    (get-byte key (rem byte-index key-bytes)))
+				    (get-byte key (pos-rem (- byte-index the-offset) key-bytes)))
 				   8))
 		      (rec-helper (+ byte-index 1))))))
+      (print the-offset)
       (rec-helper 0))))
 
 (defun old-new-repeating-key-xor (plain key)
