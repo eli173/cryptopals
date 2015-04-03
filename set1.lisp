@@ -306,20 +306,28 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 		       (aref byte i))))
     retarray))
 
+(defun get-word (bitarray n wl)
+  "get nth word, 0-indexed, wl is wordlength"
+  (let ((ret-word (make-array wl :element-type 'bit :initial-element 0 :adjustable t)))
+    (loop for i from 0 to (- wl 1) do
+	 (setf (aref ret-word i)
+	       (aref bitarray (+ i (* wl n)))))
+    ret-word))
+
 (defun get-byte (bitarray n)
   "get nth byte 0-indexed ofc"
   ;; doesn't check if it's in bounds or not
-  (let ((ret-byte (make-array 8 :element-type 'bit :initial-element 0 :adjustable t)))
-    (loop for i from 0 to 7 do
-	 (setf (aref ret-byte i)
-	       (aref bitarray (+ i (* 8 n)))))
-    ret-byte))
+  (get-word bitarray n 8))
+
+(defun set-word-n (bitarray n wl word)
+  (loop for i from 0 to (- wl 1) do
+       (setf (aref bitarray (+ i (* n wl)))
+	     (aref word i)))
+  bitarray)
 
 (defun set-byte-n (bitarray n byte)
   "sets nth byte in bitarray to byte"
-  (loop for i from 0 to 7 do
-       (setf (aref bitarray (+ i(* n 8)))
-	     (aref byte i)))
+  (set-word-n bitarray n 8 byte)
   bitarray)
 
 (defun bitarray-append (b1 b2)
@@ -466,7 +474,18 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
       (rec-helper (coerce b64str 'list) #*))))
 
 
-
+(defun separate-to-keysize (data keysize)
+  "Takes data, returns list of keysize-long sections of data"
+  (let ((wdata (adjust-to-word-length-n data keysize)))
+    (labels ((rec-helper (index retls)
+	       (cond ((= (* index keysize) (car (array-dimensions wdata)));;yeah??
+		      retls)
+		     (t (rec-helper
+			 (+ index 1)
+			 (cons
+			  (get-word wdata index keysize)
+			  retls))))))
+      (rec-helper 0 nil))))
 
 (defun break-repeating-key-xor (ciphertext keysize-min keysize-max)
   (labels ))
