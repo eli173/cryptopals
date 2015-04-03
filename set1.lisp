@@ -449,12 +449,14 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 (defun base64-to-bitarray (b64str)
   (let ((b64chars "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"))
     (labels ((lookup-b64 (char)
-	       nil)
+	       (cond ((not (position char b64chars))
+		      #*)
+		     (t (adjust-to-word-length-n (uinteger-to-bitarray (position char b64chars)) 6))))
 	     (rec-helper (chls arr)
 	       (cond ((equal chls nil) arr)
 		     (t
 		      (rec-helper
 		       (cdr chls)
-		       (concatenate arr
+		       (concatenate 'bit-vector arr
 				    (lookup-b64 (car chls))))))))
       (rec-helper (coerce b64str 'list) #*))))
