@@ -69,6 +69,8 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 
 
 (defun uinteger-to-bitarray (number)
+  ;; can't do zero... should zero be #*0 or #*?
+  ;; leaning towards #*0... fix later if need be
   (let ((bitarray (make-array (+ 1 (floor (log number 2)))
 			      :adjustable t :element-type 'bit :initial-element 0)))
     (labels ((rec-helper (num idx)
@@ -457,6 +459,7 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 		     (t
 		      (rec-helper
 		       (cdr chls)
-		       (concatenate 'bit-vector arr
-				    (lookup-b64 (car chls))))))))
+		       (concatenate 'bit-vector
+				    (lookup-b64 (car chls))
+				    arr))))))
       (rec-helper (coerce b64str 'list) #*))))
