@@ -69,15 +69,16 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 
 
 (defun uinteger-to-bitarray (number)
-  ;; can't do zero... should zero be #*0 or #*?
-  ;; leaning towards #*0... fix later if need be
-  (let ((bitarray (make-array (+ 1 (floor (log number 2)))
-			      :adjustable t :element-type 'bit :initial-element 0)))
-    (labels ((rec-helper (num idx)
-	       (cond ((= num 0) bitarray)
-		     (t (setf (aref bitarray idx) (rem num 2))
-			(rec-helper (truncate num 2) (+ idx 1))))))
-      (rec-helper number 0))))
+  (if (= number 0) #*0 
+      ;; can't do zero... should zero be #*0 or #*?
+      ;; leaning towards #*0... fix later if need be
+      (let ((bitarray (make-array (+ 1 (floor (log number 2)))
+				  :adjustable t :element-type 'bit :initial-element 0)))
+	(labels ((rec-helper (num idx)
+		   (cond ((= num 0) bitarray)
+			 (t (setf (aref bitarray idx) (rem num 2))
+			    (rec-helper (truncate num 2) (+ idx 1))))))
+	  (rec-helper number 0)))))
 
 
 
@@ -463,3 +464,9 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 				    (lookup-b64 (car chls))
 				    arr))))))
       (rec-helper (coerce b64str 'list) #*))))
+
+
+
+
+(defun break-repeating-key-xor (ciphertext keysize-min keysize-max)
+  (labels ))
