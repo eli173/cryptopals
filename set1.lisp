@@ -487,5 +487,19 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 			  retls))))))
       (rec-helper 0 nil))))
 
+(defun transpose-blocks (blocks-list n)
+  (labels ((append-to-nth (ls n e)
+	     (setf (nth n ls)
+		   (append (nth n ls) (list e)))
+	     ls)
+	   
+	   (rec-helper (ls index retls)
+	     (cond ((null ls) retls)
+		   (t (rec-helper
+		       (cdr ls)
+		       (rem (+ index 1) n)
+		       (append-to-nth ls index (car ls)))))))
+    (rec-helper blocks-list 0 (make-list n))))
+
 (defun break-repeating-key-xor (ciphertext keysize-min keysize-max)
   (labels ))
