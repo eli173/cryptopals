@@ -498,7 +498,7 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 		   (t (rec-helper
 		       (cdr ls)
 		       (rem (+ index 1) n)
-		       (append-to-nth ls index (car ls)))))))
+		       (append-to-nth retls index (car ls)))))))
     (rec-helper blocks-list 0 (make-list n))))
 
 (defun break-repeating-key-xor (ciphertext keysize-min keysize-max)
