@@ -450,10 +450,6 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 		       (+ total
 			  (logxor (aref longer index)
 				  (aref shorter index))))))))
-      (print (array-dimensions longer))
-      (print (array-dimensions shorter))
-      (print longer)
-      (print shorter)
       (rec-helper 0 0))))
 
 
@@ -502,4 +498,17 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
     (rec-helper blocks-list 0 (make-list n))))
 
 (defun break-repeating-key-xor (ciphertext keysize-min keysize-max)
-  (labels ))
+  "Keysizes are bytes"
+  (labels ((make-list-between (a b retls)
+	     (cond ((= b a) (append  retls (list a)))
+		   (t (make-list-between
+		       (+ 1 a)
+		       b
+		       (append retls (list a))))))
+	   (get-keysize-distance (ks)
+	     (hamming-distance (get-word ciphertext 0 ks)
+			       (get-word ciphertext 1 ks))))
+    (let ((keysize-list
+	   (mapcar #'get-keysize-distance
+		   (make-list-between keysize-min keysize-max nil))))
+      keysize-list)))
