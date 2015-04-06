@@ -497,9 +497,16 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 		       (append-to-nth retls index (car ls)))))))
     (rec-helper blocks-list 0 (make-list n))))
 
+(defun get-keys-and-scores-sb-xor (bitarray)
+  (labels ((mk-list (a b r)
+	     (cond ((= b a) (append r (list a)))
+		   (t (mk-list (+ 1 a) b
+			       (append r (list a)))))))
+    (mapcar #'cons (get-scores-of-char-xor bitarray) (mk-list 0 255 nil))))
+
 (defun break-repeating-key-xor (ciphertext keysize-min keysize-max)
   "Keysizes are bytes"
-  (labels ((make-list-between (a b retls)
+  (labels ((make-list-between (a b &optional retls)
 	     (cond ((= b a) (append  retls (list a)))
 		   (t (make-list-between
 		       (+ 1 a)
@@ -507,8 +514,11 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 		       (append retls (list a))))))
 	   (get-keysize-distance (ks)
 	     (hamming-distance (get-word ciphertext 0 ks)
-			       (get-word ciphertext 1 ks))))
-    (let ((keysize-list
-	   (mapcar #'get-keysize-distance
-		   (make-list-between keysize-min keysize-max nil))))
-      keysize-list)))
+			       (get-word ciphertext 1 ks)))
+	   (get-top-n-keysizes (ks-list n)
+	     (first-n n (sort ks-list
+			      #'(lambda (a b) (< (cdr a) (cdr b)))))))
+    (let ((keysize-dist-list
+	   (mapcar #'(lambda (e) (cons e (get-keysize-distance e)))
+		   (make-list-between keysize-min keysize-max))))
+      keysize-dist-list)))
