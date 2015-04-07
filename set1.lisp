@@ -254,6 +254,19 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 				   #'(lambda (a b)
 				       (> (car a) (car b))))))))
 
+(defun gsasw (ba wl)
+  (labels ((get-pair (theword)
+	     (cons (score-bitarray (single-word-xor
+				    (adjust-to-word-length-n (copy-bit-array ba) wl)
+				    (adjust-to-word-length-n (uinteger-to-bitarray theword) wl)))
+		   (single-word-xor (adjust-to-word-length-n (copy-bit-array ba) wl)
+				    (adjust-to-word-length-n (uinteger-to-bitarray theword) wl))))
+	   (rec-helper (word &optional retls)
+	     (cond ((= word (expt 2 wl))
+		    retls)
+		   (t (rec-helper (+ word 1) (cons (get-pair word) retls))))))
+    (rec-helper 1 nil)))
+
 (defun get-scores-and-strings (bitarray)
   (labels ((get-pair (thebyte)
 	     (cons (score-bitarray
