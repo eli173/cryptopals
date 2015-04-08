@@ -517,6 +517,19 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 			       (append r (list a)))))))
     (mapcar #'cons (get-scores-of-char-xor bitarray) (mk-list 0 255 nil))))
 
+
+(defun import-b64-file (path)
+  (let ((f (open path))
+	(curr-line nil))
+    (labels ((rec-helper (retarray)
+	       (if (not (setf curr-line (read-line f nil nil)))
+		   retarray
+		   (rec-helper
+		    (bitarray-append
+		     retarray
+		     (base64-to-bitarray curr-line))))))
+      (rec-helper #*))))
+
 (defun break-repeating-key-xor (ciphertext keysize-min keysize-max)
   "Keysizes are bytes"
   (labels ((make-list-between (a b &optional retls)
@@ -534,4 +547,4 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
     (let ((keysize-dist-list
 	   (mapcar #'(lambda (e) (cons e (get-keysize-distance e)))
 		   (make-list-between keysize-min keysize-max))))
-      keysize-dist-list)))
+      (get-top-n-keysizes keysize-dist-list 5))))
