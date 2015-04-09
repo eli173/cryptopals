@@ -504,8 +504,8 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 	   (rec-helper))
     ()))
 
-(defun tr-bl (blocks-list)
-  ())
+(defun transpose (list-of-lists)
+  (apply #'mapcar #'list list-of-lists))
 
 (defun get-keys-and-scores-sb-xor (bitarray)
   (labels ((mk-list (a b r)
@@ -516,7 +516,9 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 
 (defun transpose-bitarray (ba n wl)
   "Takes ba and gives n lists with wl-long chunks"
-  (transpose-blocks (separate-to-keysize ba wl) n))
+  (transpose (mapcar
+	      #'(lambda (e) (separate-to-keysize e wl))
+	      (separate-to-keysize ba (* wl n)))))
 
 (defun import-b64-file (path)
   (let ((f (open path))
