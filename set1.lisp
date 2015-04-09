@@ -3,7 +3,7 @@
 
 (defun print-answers ()
   (print "Challenge 1:")
-  (print (get-base6-rep (hex-import-string "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d")))
+  (print (get-base64-rep (hex-import-string "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d")))
   (print "Challenge 2:")
   (print (get-hex-rep (fixed-xor (hex-import-string "1c0111001f010100061a024b53535009181c")
 				 (hex-import-string "686974207468652062756c6c277320657965"))))
@@ -496,19 +496,16 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 			  retls))))))
       (rec-helper 0 nil))))
 
-(defun transpose-blocks (blocks-list n)
+(defun transpose-blocks (blocks-list)
   (labels ((append-to-nth (ls n e)
 	     (setf (nth n ls)
 		   (append (nth n ls) (list e)))
 	     ls)
-	   
-	   (rec-helper (ls index retls)
-	     (cond ((null ls) retls)
-		   (t (rec-helper
-		       (cdr ls)
-		       (rem (+ index 1) n)
-		       (append-to-nth retls index (car ls)))))))
-    (rec-helper blocks-list 0 (make-list n))))
+	   (rec-helper))
+    ()))
+
+(defun tr-bl (blocks-list)
+  ())
 
 (defun get-keys-and-scores-sb-xor (bitarray)
   (labels ((mk-list (a b r)
@@ -517,6 +514,9 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 			       (append r (list a)))))))
     (mapcar #'cons (get-scores-of-char-xor bitarray) (mk-list 0 255 nil))))
 
+(defun transpose-bitarray (ba n wl)
+  "Takes ba and gives n lists with wl-long chunks"
+  (transpose-blocks (separate-to-keysize ba wl) n))
 
 (defun import-b64-file (path)
   (let ((f (open path))
@@ -539,12 +539,15 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 		       b
 		       (append retls (list a))))))
 	   (get-keysize-distance (ks)
-	     (hamming-distance (get-word ciphertext 0 ks)
-			       (get-word ciphertext 1 ks)))
+	     (hamming-distance (get-word ciphertext 0 (* 8 ks))
+			       (get-word ciphertext 1 (* 8 ks))))
 	   (get-top-n-keysizes (ks-list n)
 	     (first-n n (sort ks-list
 			      #'(lambda (a b) (< (cdr a) (cdr b)))))))
     (let ((keysize-dist-list
 	   (mapcar #'(lambda (e) (cons e (get-keysize-distance e)))
 		   (make-list-between keysize-min keysize-max))))
-      (get-top-n-keysizes keysize-dist-list 5))))
+      ())))
+
+(defun s-1-6-playground ()
+  (transpose-blocks (separate-to-keysize (import-b64-file "set-1-6.txt") (* 8 3)) 3))
