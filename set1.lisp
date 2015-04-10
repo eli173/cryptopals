@@ -540,8 +540,34 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 (defun is-ascii-string (str)
   (every #'identity (map 'list #'is-ascii-char str)))
 
-(defun break-repeating-key-xor (ciphertext keysize-min keysize-max)
-  "Keysizes are bytes"
+(defun ba-list-to-ba (ba-ls)
+  (labels ((rec-helper (ls retarr)
+	     (cond ((null ls) retarr)
+		   (t (rec-helper (cdr ls) (bitarray-append (car ls) retarr))))))
+    (rec-helper ba-ls #*)))
+
+(defun break-single-byte-xor (ciphertext n)
+  "returns top n options for single-byte xor keys"
+  (mapcar #'(lambda (el)
+	      (cons (fixed-xor (get-byte ciphertext 0)
+			       (get-byte (string-to-bit-array el) 0))
+		    el))
+	  (get-top-n-strings n ciphertext)))
+
+(defun break-ks-xor (ciphertext ks n )
+  "like break-sbxor but for keysize ks"
+  (mapcar #'(lambda (e) (break-single-byte-xor (ba-list-to-ba e) n))
+	  (transpose-bitarray ciphertext ks 8)))
+
+(defun unsplice-strings (str-ls)
+  (reduce #'(lambda (a b) (concatenate 'string a b))
+	  (mapcar #'(lambda (e) (coerce e 'string))
+		  (apply #'mapcar #'list
+			 (mapcar #'(lambda (e) (coerce e 'list)) str-ls)))
+	  :initial-value ""))
+
+(defun break-repeating-key-xor (ciphertext keysize-min keysize-max n)
+  "Gets top n {keysizes, matches, strings} options I guess? Keysizes are bytes"
   (labels ((make-list-between (a b &optional retls)
 	     (cond ((= b a) (append  retls (list a)))
 		   (t (make-list-between
