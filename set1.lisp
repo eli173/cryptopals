@@ -501,8 +501,9 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 	     (setf (nth n ls)
 		   (append (nth n ls) (list e)))
 	     ls)
-	   (rec-helper))
-    ()))
+	   (rec-helper (e)
+	     nil))
+    nil))
 
 (defun transpose (list-of-lists)
   (apply #'mapcar #'list list-of-lists))
@@ -532,6 +533,13 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 		     (base64-to-bitarray curr-line))))))
       (rec-helper #*))))
 
+(defun is-ascii-char (chr)
+  (and (> (char-code chr) 0)
+       (< (char-code chr) 128)))
+
+(defun is-ascii-string (str)
+  (every #'identity (map 'list #'is-ascii-char str)))
+
 (defun break-repeating-key-xor (ciphertext keysize-min keysize-max)
   "Keysizes are bytes"
   (labels ((make-list-between (a b &optional retls)
@@ -549,7 +557,7 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
     (let ((keysize-dist-list
 	   (mapcar #'(lambda (e) (cons e (get-keysize-distance e)))
 		   (make-list-between keysize-min keysize-max))))
-      ())))
+      )))
 
 (defun s-1-6-playground ()
-  (transpose-blocks (separate-to-keysize (import-b64-file "set-1-6.txt") (* 8 3)) 3))
+  (transpose-bitarray  (import-b64-file "set-1-6.txt") (* 8 3) 3))
