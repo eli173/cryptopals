@@ -537,6 +537,38 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
   (and (> (char-code chr) 0)
        (< (char-code chr) 128)))
 
+(defun is-printable-char (chr)
+  (or (and (< (char-code chr) 177)
+	   (> (char-code chr) 31))
+      (= (char-code chr) 9)
+      (= (char-code chr) 10)
+      (= (char-code chr) 11)
+      (= (char-code chr) 12)
+      (= (char-code chr) 13)))
+
+(defun is-printable-str (str)
+  (every #'is-printable-char str))
+
+(defun sort-by-num-chars (strs)
+  "sorts by num of alphanums in str"
+  (labels ((is-alphanum (c)
+	     (or (and
+		  (>= (char-code c) 97)
+		  (<= (char-code c) 122))
+		 (and
+		  (>= (char-code c) 65)
+		  (<= (char-code c) 90))
+		 (and
+		  (>= (char-code c) 48)
+		  (>= (char-code c) 57))))
+	   (num-alphanums (s)
+	     (reduce #'+
+		     (map 'list #'(lambda (e) (if (is-alphanum e) 1 0)) s
+		      )))
+	   (more-alphanums (a b)
+	     (> (num-alphanums a) (num-alphanums b))))
+    (sort strs #'more-alphanums)))
+
 (defun is-ascii-string (str)
   (every #'identity (map 'list #'is-ascii-char str)))
 
