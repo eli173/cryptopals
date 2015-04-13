@@ -607,15 +607,16 @@ I go crazy when I hear a cymbal") (string-to-bit-array "ICE"))))
 		       b
 		       (append retls (list a))))))
 	   (get-keysize-distance (ks)
-	     (hamming-distance (get-word ciphertext 0 (* 8 ks))
-			       (get-word ciphertext 1 (* 8 ks))))
+	     (/ (hamming-distance (get-word ciphertext 0 (* 8 ks))
+				  (get-word ciphertext 1 (* 8 ks)))
+		ks))
 	   (get-top-n-keysizes (ks-list n)
 	     (first-n n (sort ks-list
 			      #'(lambda (a b) (< (cdr a) (cdr b)))))))
     (let ((keysize-dist-list
 	   (mapcar #'(lambda (e) (cons e (get-keysize-distance e)))
 		   (make-list-between keysize-min keysize-max))))
-      )))
+      (get-top-n-keysizes keysize-dist-list 5))))
 
 (defun s-1-6-playground ()
   (transpose-bitarray  (import-b64-file "set-1-6.txt") (* 8 3) 3))
